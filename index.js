@@ -1,44 +1,43 @@
 'use strict';
-var NRT = require('./lib/NewRemoteTransmitter.js');
+var exec = require('child_process').exec;
 
 var Service, Characteristic;
 
-module.exports = function(homebridge) {
-  Service = homebridge.hap.Service;
-  Characteristic = homebridge.hap.Characteristic;
-  homebridge.registerAccessory('homebridge-remote-transmitter', 'RemoteTransmitter', RTAccessory);
+module.exports = function (homebridge) {
+    Service = homebridge.hap.Service;
+    Characteristic = homebridge.hap.Characteristic;
+    homebridge.registerAccessory('homebridge-rcswitch-pi', 'rcswitch-pi', RTAccessory);
 };
+
+var cmd = '/home/pi/applications/rcswitch-orig/send ';
+function execCB(error, stdout, stderr) {
+    if (error) console.log(error);
+    if (stdout) console.log(stdout);
+    if (stderr) console.log(stderr);
+}
+function buildCmd(system, unit, state){
+    return cmd + system + " " + unit + " " +state; 
+}
 
 function RTAccessory(log, config) {
-  
-  let address = config.address;
-  let device = config.device;
-  let pin = config.pin;
-  let nrt = NRT(address, pin, 250, 2);
-  
-  var platform = this;
-  this.log = log;
-  this.name = config.name;
-  this.service = new Service[config.service || 'Outlet'](this.name);
 
-  this.service.getCharacteristic(Characteristic.On)
-    .on('set', function(value, callback) {
-      var switchOn = value ? true : false
-      platform.log(config.name, "switch -> " + switchOn);
-      nrt.switchUnit(device, switchOn);
-      callback();
-  });
-  
-  if (config.dimmable) {
-    this.service.addCharacteristic(Characteristic.Brightness)
-      .on('set', function(level, callback) {
-      platform.log(config.name, "dim -> " + level);
-      nrt.sendDim(device, Math.ceil((level / 100) * 15)); 
-      callback();
-    });
-  }
+    var system = config.system;
+    var unit = config.unit;
+
+    var platform = this;
+    this.log = log;
+    this.name = config.name;
+    this.service = new Service[config.service || 'Outlet'](this.name);
+
+    this.service.getCharacteristic(Characteristic.On)
+        .on('set', function (value, callback) {
+            var state = value ? 1 : 0;
+            platform.log(config.name, "switch -> " + state);
+            exec(buildCmd(system, unit, state), execCB);
+            callback();
+        });
 };
 
-RTAccessory.prototype.getServices = function() {
-  return [this.service];
+RTAccessory.prototype.getServices = function () {
+    return [this.service];
 };
