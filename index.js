@@ -15,14 +15,14 @@ function execCB(error, stdout, stderr) {
     if (stdout) console.log(stdout);
     if (stderr) console.log(stderr);
 }
-function buildCmd(system, unit, state){
-    return cmd + system + " " + unit + " " +state; 
+function buildCmd(system, device, state){
+    return cmd + system + " " + device + " " +state;
 }
 
 function RTAccessory(log, config) {
 
     var system = config.system;
-    var unit = config.unit;
+    var device = config.device;
 
     var platform = this;
     this.log = log;
@@ -33,7 +33,7 @@ function RTAccessory(log, config) {
         .on('set', function (value, callback) {
             var state = value ? 1 : 0;
             platform.log(config.name, "switch -> " + state);
-            exec(buildCmd(system, unit, state), execCB);
+            exec(buildCmd(system, device, state), execCB);
             callback();
         });
 };
