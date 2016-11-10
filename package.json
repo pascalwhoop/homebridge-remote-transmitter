@@ -1,8 +1,8 @@
 {
-  "name": "homebridge-remote-transmitter",
+  "name": "homebridge-rcswitch-pi",
   "version": "0.0.4",
-  "description": "Homebridge plugin for switching RF 433MHz based self-learning receivers",
-  "author": "Job Wind <job@monkeystation.nl>",
+  "description": "switching 433mhz plugs by elro",
+  "author": "Pascal Brokmeier",
   "license": "MIT",
   "keywords": [
     "homebridge-plugin"
