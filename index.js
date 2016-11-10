@@ -1,5 +1,18 @@
 'use strict';
 var exec = require('child_process').exec;
+var queue = require('queue');
+var q = queue();
+q.start();
+
+var execSync = function(cmd, execCB){
+    q.push(function(cb){
+        exec(cmd, function(){
+            execCB();
+            cb();
+        });
+
+    })
+};
 
 var Service, Characteristic;
 
@@ -33,7 +46,7 @@ function RTAccessory(log, config) {
         .on('set', function (value, callback) {
             var state = value ? 1 : 0;
             platform.log(config.name, "switch -> " + state);
-            exec(buildCmd(system, device, state), execCB);
+            execSync(buildCmd(system, device, state), execCB);
             callback();
         });
 };
