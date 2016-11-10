@@ -12,6 +12,7 @@
     "homebridge": ">=0.2.0"
   },
   "dependencies": {
+    "async": "^2.1.2",
     "queue": "^4.0.0"
   }
 }

@@ -1,18 +1,15 @@
 'use strict';
 var exec = require('child_process').exec;
-var queue = require('queue');
-var q = queue();
-q.start();
+var async = require('async');
 
-var execSync = function(cmd, execCB){
-    q.push(function(cb){
-        exec(cmd, function(){
-            execCB();
-            cb();
-        });
-
-    })
-};
+//making the calling othe commands queued
+var q = async.queue(function(cmd, callback){
+    exec(cmd, function(){
+        setTimeout(function(){
+            callback()
+        },150);
+    });
+});
 
 var Service, Characteristic;
 
@@ -28,8 +25,8 @@ function execCB(error, stdout, stderr) {
     if (stdout) console.log(stdout);
     if (stderr) console.log(stderr);
 }
-function buildCmd(system, device, state){
-    return cmd + system + " " + device + " " +state;
+function buildCmd(system, unit, state){
+    return cmd + system + " " + unit + " " +state;
 }
 
 function RTAccessory(log, config) {
@@ -46,8 +43,7 @@ function RTAccessory(log, config) {
         .on('set', function (value, callback) {
             var state = value ? 1 : 0;
             platform.log(config.name, "switch -> " + state);
-            execSync(buildCmd(system, device, state), execCB);
-            callback();
+            q.push(buildCmd(system, device, state), callback);
         });
 };
 
